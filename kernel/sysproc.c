@@ -77,6 +77,13 @@ sys_kill(void)
   return kill(pid);
 }
 
+uint64
+sys_memsize(void)
+{
+  struct proc *p = myproc();
+  return p->sz;
+}
+
 // return how many clock tick interrupts have occurred
 // since start.
 uint64
@@ -89,3 +96,4 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
