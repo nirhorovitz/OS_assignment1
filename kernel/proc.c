@@ -688,9 +688,12 @@ getproc(int pid)
 {
   struct proc *p;
   for (p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
     if (p->pid == pid) {
+      release(&p->lock);
       return p;
     }
+    release(&p->lock);
   }
   return 0;
 }
@@ -752,7 +755,7 @@ co_yield(int pid, int value)
   acquire(&second->lock);
 
   // fail because the other process is not in a valid state
-  if (otherproc->state == ZOMBIE || otherproc->state == UNUSED)
+  if (otherproc->state == ZOMBIE || otherproc->state == UNUSED || otherproc->killed)
   {
     release(&second->lock);
     release(&first->lock);

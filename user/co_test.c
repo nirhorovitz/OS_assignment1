@@ -43,9 +43,7 @@ basic_test(void)
         exit(1);
       }
     }
-    printf("BASIC TEST: %d exchanges OK. Test now hangs by design.\n", ITERS);
-    printf("            Exit qemu with Ctrl-A x.\n");
-    wait(0);
+    exit(0);
   }
 }
 
