@@ -780,6 +780,11 @@ co_yield(int pid, int value)
     release(&otherproc->lock);
     sched();
 
+    if (killed(myproc)) {            // woken by kill(), not by a peer co_yield
+      release(&myproc->lock);        // only this one is held in this path
+      return -1;
+  }
+
     // Resumed by a future sender's Case A swtch. That sender held both
     // p->locks at swtch (its own and ours). In the assignment's two-proc
     // scenario the future sender is the same proc as `other`, so the
