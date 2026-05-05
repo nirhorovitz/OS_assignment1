@@ -734,8 +734,6 @@ getproc(int pid)
 //   - Pid recycling: if A parks after co_yield(B, ...), B exits, and a
 //     new proc reuses B's pid and yields to A, A cannot tell. Same
 //     looseness as above.
-//   - Multi-CPU: the assignment requires correctness only when both
-//     procs run on the same CPU (Makefile sets CPUS := 1).
 int
 co_yield(int pid, int value)
 {
@@ -778,9 +776,11 @@ co_yield(int pid, int value)
     // Drop other's lock so noff == 1 going into sched(); keep me->lock
     // held so no one can swtch into us before our context is saved.
     release(&otherproc->lock);
-    sched();
+    int intena = mycpu()->intena;
+    swtch(&myproc->context, &mycpu()->context);
+    mycpu()->intena = intena;
 
-    if (killed(myproc)) {            // woken by kill(), not by a peer co_yield
+    if (myproc->killed) {            // woken by kill(), not by a peer co_yield
       release(&myproc->lock);        // only this one is held in this path
       return -1;
   }
